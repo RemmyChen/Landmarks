@@ -1,66 +1,217 @@
 <!DOCTYPE html>
+
 <html>
-<head>
-  <% include ../partials/header.ejs %>
-</head>
+	<head>
+		<title>Historic Landmarks</title>
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=true"></script>
+		<link rel="stylesheet" href="style.css" />
+		<script>
+			// my geolocation and login
+			var myLat = 0;
+			var myLng = 0;
+			var me = new google.maps.LatLng(myLat, myLng);
+			var mylogin = "7UzqUwa9";
 
-<body>
+			// map characteristics
+			var myOptions = {
+				zoom: 13, // the larger the zoom number, the bigger the zoom
+				center: me,
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+			};
+			var map;
+			var marker;
+			var infowindow = new google.maps.InfoWindow();
+			
+			// list of person objects, list of landmark objects, list of distances of landmarks from me
+			var peopleList = [];
+			var landmarkList = [];
+			var distanceList = [];
+			var d = 0;
+			var shortestdist = 1; 
+			var iteration = 0;
 
-  <% include ../partials/nav.ejs %>
+			// initiate js functions after html is loaded
+			function init()
+			{
+				map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+				getMyLocation();
+			}
+			
+			// retrieves my location
+			function getMyLocation() {
+				if (navigator.geolocation) { // if navigator.geolocation object is supported by browser
+					navigator.geolocation.getCurrentPosition(function(position) {
+						myLat = position.coords.latitude;
+						myLng = position.coords.longitude;
+						retrieveData();
+					});
+				}
+				else {
+					alert("Geolocation is not supported by your web browser.");
+				}
+			}
 
-<div class="jumbotron text-center">
-  <div class="container">
-    <a href="/" class="lang-logo">
-      <img src="/lang-logo.png">
-    </a>
-    <h1>Getting Started with Node on Heroku</h1>
-    <p>This is a sample Node application deployed to Heroku. It's a reasonably simple app - but a good foundation for understanding how to get the most out of the Heroku platform.</p>
-    <a type="button" class="btn btn-lg btn-default" href="https://devcenter.heroku.com/articles/getting-started-with-nodejs"><span class="glyphicon glyphicon-flash"></span> Getting Started with Node</a>
-    <a type="button" class="btn btn-lg btn-primary" href="https://github.com/heroku/node-js-getting-started"><span class="glyphicon glyphicon-download"></span> Source on GitHub</a>
-  </div>
-</div>
-<div class="container">
-  <div class="alert alert-info text-center" role="alert">
-    To deploy your own copy, and learn the fundamentals of the Heroku platform, head over to the <a href="https://devcenter.heroku.com/articles/getting-started-with-nodejs" class="alert-link">Getting Started with Node on Heroku</a> tutorial.
-  </div>
-  <hr>
-  <div class="row">
-    <div class="col-md-6">
-      <h3><span class="glyphicon glyphicon-info-sign"></span> How this sample app works</h3>
-      <ul>
-        <li>This app was deployed to Heroku, either using Git or by using <a href="https://github.com/heroku/node-js-getting-started">Heroku Button</a> on the repository.</li>
+			// posts my location & retrieves landmarks and peers' locations via heroku .json
+			function retrieveData() { 
+				request = new XMLHttpRequest();
+				request.open("POST", "https://lit-brushlands-98638.herokuapp.com/sendLocation", true);
+				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
-        <li>When Heroku received the source code, it fetched all the dependencies in the <a href="https://github.com/heroku/node-js-getting-started/blob/master/package.json">package.json</a>, creating a deployable slug.</li>
-        <li>The platform then spins up a dyno, a lightweight container that provides an isolated environment in which the slug can be mounted and executed.</li>
-        <li>You can scale your app, manage it, and deploy over <a href="https://addons.heroku.com/">150 add-on services</a>, from the Dashboard or CLI.</li>
-      </ul>
-    </div>
-    <div class="col-md-6">
-      <h3><span class="glyphicon glyphicon-link"></span> Next Steps</h3>
-      <ul>
-        <li>If you are following the <a href="https://devcenter.heroku.com/articles/getting-started-with-nodejs">Getting Started</a> guide, then please head back to the tutorial and follow the next steps!</li>
-        <li>If you deployed this app by deploying the Heroku Button, then in a command line shell, run:</li>
-        <ul>
-          <li><code>git clone https://github.com/heroku/node-js-getting-started.git</code> - this will create a local copy of the source code for the app</li>
-          <li><code>cd node-js-getting-started</code> - change directory into the local source code repository</li>
-          <li><code>heroku git:remote -a &lt;your-app-name></code> - associate the Heroku app with the repository</li>
-          <li>You'll now be set up to run the app locally, or <a href="https://devcenter.heroku.com/articles/getting-started-with-nodejs#push-local-changes">deploy changes</a> to Heroku</li>
-        </ul>
-      </ul>
-      <h3><span class="glyphicon glyphicon-link"></span> Helpful Links</h3>
-      <ul>
-        <li><a href="https://www.heroku.com/home">Heroku</a></li>
-        <li><a href="https://devcenter.heroku.com/">Heroku Dev Center</a></li>
-        <li><a href="https://devcenter.heroku.com/articles/getting-started-with-nodejs">Getting Started with Node on Heroku</a></li>
-        <li><a href="https://devcenter.heroku.com/articles/deploying-nodejs">Deploying Node Apps on Heroku</a></li>
-      </ul>
-    </div>
-  </div> <!-- row -->
-   <div class="alert alert-info text-center" role="alert">
-    Please do work through the Getting Started guide, even if you do know how to build such an application.  The guide covers the basics of working with Heroku, and will familiarize you with all the concepts you need in order to build and deploy your own apps.
-  </div>
-</div>
+				request.onreadystatechange = function() {
+					if (request.readyState == 4 && request.status == 200) {
+						rawData = request.responseText;
+						messages = JSON.parse(rawData);
 
+						// create constructor for Person Objects
+						function Person(personLat, personLng, personLogin) {
+							this.personLat = personLat;
+							this.personLng = personLng;
+							this.personLogin = personLogin;
+						}
 
-</body>
+						// create a List of Person Objects for others
+						for (count = 0; count < messages.people.length; count++) {
+							peopleList[count] = new Person(messages.people[count].lat, messages.people[count].lng, messages.people[count].login);
+						}
+						
+						// create constructor for Landmark Objects
+						function Landmark(landmarkLat, landmarkLng, landmarkName, landmarkDets) {
+							this.landmarkLat = landmarkLat;
+							this.landmarkLng = landmarkLng;
+							this.landmarkName = landmarkName;
+							this.landmarkDets = landmarkDets;
+						}
+						
+						// create a List of Landmark Objects for landmarks
+						for (count = 0; count < messages.landmarks.length; count++) {
+							landmarkList[count] = new Landmark(messages.landmarks[count].geometry.coordinates[1], messages.landmarks[count].geometry.coordinates[0], messages.landmarks[count].properties.Location_Name, messages.landmarks[count].properties.Details);
+						} 
+
+						renderMap();
+					}
+				}
+				request.send("login=" + mylogin + "&lat=" + myLat + "&lng=" + myLng);
+			}
+
+			// displays google map with markers for peers, landmarks and self
+			function renderMap()
+			{
+				me = new google.maps.LatLng(myLat, myLng);
+				
+				// update map and go there...
+				map.panTo(me);
+				
+				// add customized marker icons
+				var iconBase = 'http://localhost:8000/';
+		        var icons = {
+		          self: {icon: iconBase + 'me.png'},
+		          others: {icon: iconBase + 'other.png'},
+		          landmarks: {icon: iconBase + 'landmark.png'}
+		        };
+
+				// loop through people list and place a marker for each person
+		        for (var i = 0; i < peopleList.length; i++) {
+
+		        	calcDistance(peopleList[i].personLat, peopleList[i].personLng);
+					
+		          	var personlatLng = new google.maps.LatLng(peopleList[i].personLat, peopleList[i].personLng);
+			        marker = new google.maps.Marker({
+			            position: personlatLng,
+			            icon: icons['others'].icon,
+			            content: "<p>" + peopleList[i].personLogin + "</p><p>Distance Away: " + d.toFixed(2) + " miles</p>"
+			        });
+		        	marker.setMap(map);
+
+		        	// open info window on click of marker
+					google.maps.event.addListener(marker, 'click', function() {
+						infowindow.setContent(this.content);
+						infowindow.open(map, this);
+					});
+		    	}
+
+		        // loop through landmark list and place a marker for each landmark
+		        for (var j = 0; j < landmarkList.length; j++) {
+		          	
+		          	calcDistance(landmarkList[j].landmarkLat, landmarkList[j].landmarkLng);
+
+		          	distanceList[j] = d;
+
+		          	var landmarklatLng = new google.maps.LatLng(landmarkList[j].landmarkLat, landmarkList[j].landmarkLng);
+			        
+			        marker = new google.maps.Marker({
+			            position: landmarklatLng,
+			            icon: icons['landmarks'].icon,
+			            content: "<p>" + landmarkList[j].landmarkName + "</p><p>" + landmarkList[j].landmarkDets + "</p><p>Distance Away: " + d.toFixed(2) + " miles</p>"
+			        });
+		        	marker.setMap(map);
+
+					// open info window on click of marker
+					google.maps.event.addListener(marker, 'click', function() {
+						infowindow.setContent(this.content);
+						infowindow.open(map, this);
+					});
+				}
+
+				// loop through distance list to find closest landmark
+				for (var k = 0; k < distanceList.length; k++) {
+					if (shortestdist > distanceList[k]) {
+		          		shortestdist = distanceList[k];
+		          		iteration = k;
+
+			        var closestlandmarklatLng = new google.maps.LatLng(landmarkList[k].landmarkLat, landmarkList[k].landmarkLng);
+
+					// draw the polyline route from me to closest landmark
+					var route = new google.maps.Polyline({
+						path: [me, closestlandmarklatLng],
+						map: map
+					});	
+		          	}
+				}
+
+				// create a marker for self
+				marker = new google.maps.Marker({
+					position: me,
+					icon: icons['self'].icon,
+					content: "<p>" + mylogin + "</p><p>Closest Landmark is: " + landmarkList[iteration].landmarkName + "</p><p>Distance Away: " + shortestdist.toFixed(2) + " miles</p>"
+				});
+				marker.setMap(map);
+
+				// open info window on click of marker
+				google.maps.event.addListener(marker, 'click', function() {
+					infowindow.setContent(this.content);
+					infowindow.open(map, this);
+				});	
+			}
+
+			// find distance between 2 locations
+			function calcDistance(someLat, someLng)
+			{
+					Number.prototype.toRad = function() {
+					   return this * Math.PI / 180;
+					}
+
+					var lat2 = someLat; 
+					var lon2 = someLng; 
+					var lat1 = myLat; 
+					var lon1 = myLng; 
+
+					var R = 6371; // km 
+					var x1 = lat2-lat1;
+					var dLat = x1.toRad();  
+					var x2 = lon2-lon1;
+					var dLon = x2.toRad();  
+					var a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
+					                Math.cos(lat1.toRad()) * Math.cos(lat2 * Math.PI / 180) * 
+					                Math.sin(dLon/2) * Math.sin(dLon/2);  
+					var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+					d = (R * c) / 1.609344; // division converts km to miles
+			}
+
+		</script>
+	</head>
+	
+	<body onload="init()">
+		<div id="map_canvas"></div>
+	</body>
 </html>

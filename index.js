@@ -13,11 +13,15 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.set('port', (process.env.PORT || 5000));
+app.set('port', (process.env.PORT || 8000));
 
-//app.use(express.static(__dirname + '/public'));
-//app.set('views', __dirname + '/views');
-//app.set('view engine', 'ejs');
+app.use(express.static(__dirname + '/views/pages'));
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+
+app.get('/', function(req, response) {
+    response.render('pages/index');
+});
 
 // mongo initialization and connect to database
 var mongoUri = process.env.MONGODB_URI || process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/assignment3';
@@ -105,7 +109,7 @@ app.get('/checkins.json', function(request, response) {
 
 
 // third part
-app.get('/', function(request, response) {
+app.get('/checkins', function(request, response) {
 	db.collection('checkins', function(err, coll) {
 		response.set('Content-Type', 'text/html');
 		var indexPage = '';
