@@ -22,7 +22,8 @@ To perform CRUD manipulations on local Mongo databases and/or collections, need 
 To deploy this app onto Heroku and MongoDB, type:
 	git add .
 	git commit -m 'some message'
-	git push heroku master
+	git push heroku master // to update the remote repository on heroku
+	git push github master // to update the remote repository on github
 
 and to check if working, type:
 	for part1: curl https://lit-brushlands-98638.herokuapp.com/
