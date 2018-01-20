@@ -103,7 +103,7 @@
 				map.panTo(me);
 				
 				// add customized marker icons
-				var iconBase = 'Landmarks/views/pages/';
+				var iconBase = 'http://github.com/RemmyChen/Landmarks/tree/master/views/pages/';
 		        var icons = {
 		          self: {icon: iconBase + 'me.png'},
 		          others: {icon: iconBase + 'other.png'},
@@ -132,6 +132,7 @@
 
 		        // loop through landmark list and place a marker for each landmark
 		        for (var j = 0; j < landmarkList.length; j++) {
+		          	
 		          	calcDistance(landmarkList[j].landmarkLat, landmarkList[j].landmarkLng);
 
 		          	distanceList[j] = d;
