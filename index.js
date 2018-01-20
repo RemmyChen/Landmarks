@@ -19,9 +19,6 @@ app.use(express.static(__dirname + '/views/pages'));
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
-app.get('/', function(req, response) {
-    response.render('pages/index');
-});
 
 // mongo initialization and connect to database
 var mongoUri = process.env.MONGODB_URI || process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/assignment3';
@@ -32,6 +29,11 @@ var db = MongoClient.connect(mongoUri, function(error, databaseConnection) {
 });
 
 // first part
+app.get('/', function(req, response) {
+    response.render('pages/index');
+});
+
+// second part
 app.post('/sendLocation', function(request,response) {
 	var login = request.body.login;
 	login = ("" + login).replace(/[^\w\s]/gi, '');
@@ -81,8 +83,7 @@ app.post('/sendLocation', function(request,response) {
 	}
 });
 
-
-// second part
+// third part
 app.get('/checkins.json', function(request, response) {
 	response.set('Content-Type', 'text/html');
 	var login = request.query.login;
@@ -108,7 +109,7 @@ app.get('/checkins.json', function(request, response) {
 });
 
 
-// third part
+// fourth part
 app.get('/checkins', function(request, response) {
 	db.collection('checkins', function(err, coll) {
 		response.set('Content-Type', 'text/html');
