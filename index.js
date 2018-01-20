@@ -20,10 +20,10 @@ app.set('port', (process.env.PORT || 5000));
 //app.set('view engine', 'ejs');
 
 // mongo initialization and connect to database
-var mongoUri = process.env.MONGODB_URI || process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost';
+var mongoUri = process.env.MONGODB_URI || process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/assignment3';
 var MongoClient = require('mongodb').MongoClient, format = require('util').format;
 var db = MongoClient.connect(mongoUri, function(error, databaseConnection) {
-	db = databaseConnection.db('assignment3');
+	db = databaseConnection;
 	db.collection('landmarks').createIndex({'geometry':"2dsphere"});
 });
 
