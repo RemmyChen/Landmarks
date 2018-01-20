@@ -25,7 +25,7 @@ To deploy this app onto Heroku and MongoDB, type:
 	git push heroku master
 
 and type:
-	for part1: curl http://lit-brushlands-98638.herokuapp.com/
-	for part2: curl --data "login=pikachu&lat=42.508032&lng=-71.0982818" http://lit-brushlands-98638.herokuapp.com/sendLocation
-	for part3: curl http://lit-brushlands-98638.herokuapp.com/checkins.json?login=rchen
-	for part4: curl http://lit-brushlands-98638.herokuapp.com/checkins
+	for part1: curl https://lit-brushlands-98638.herokuapp.com/
+	for part2: curl --data "login=pikachu&lat=42.508032&lng=-71.0982818" https://lit-brushlands-98638.herokuapp.com/sendLocation
+	for part3: curl https://lit-brushlands-98638.herokuapp.com/checkins.json?login=rchen
+	for part4: curl https://lit-brushlands-98638.herokuapp.com/checkins
