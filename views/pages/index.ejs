@@ -103,7 +103,7 @@
 				map.panTo(me);
 				
 				// add customized marker icons
-				var iconBase = 'https://github.com/RemmyChen/Landmarks/tree/master/views/pages/';
+				var iconBase = 'Landmarks/views/pages/';
 		        var icons = {
 		          self: {icon: iconBase + 'me.png'},
 		          others: {icon: iconBase + 'other.png'},
@@ -116,8 +116,6 @@
 		        	calcDistance(peopleList[i].personLat, peopleList[i].personLng);
 					
 		          	var personlatLng = new google.maps.LatLng(peopleList[i].personLat, peopleList[i].personLng);
-			        console.log("1");
-			        console.log(peopleList[i].personLat);
 			        marker = new google.maps.Marker({
 			            position: personlatLng,
 			            icon: icons['others'].icon,
