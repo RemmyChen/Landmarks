@@ -116,6 +116,8 @@
 		        	calcDistance(peopleList[i].personLat, peopleList[i].personLng);
 					
 		          	var personlatLng = new google.maps.LatLng(peopleList[i].personLat, peopleList[i].personLng);
+			        console.log("1");
+			        console.log(personLatLng);
 			        marker = new google.maps.Marker({
 			            position: personlatLng,
 			            icon: icons['others'].icon,
@@ -132,7 +134,6 @@
 
 		        // loop through landmark list and place a marker for each landmark
 		        for (var j = 0; j < landmarkList.length; j++) {
-		          	
 		          	calcDistance(landmarkList[j].landmarkLat, landmarkList[j].landmarkLng);
 
 		          	distanceList[j] = d;
